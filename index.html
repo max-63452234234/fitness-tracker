@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track your fitness journey with this easy-to-use workout tracker. Monitor your progress, maintain streaks, and achieve your fitness goals.">
+    <meta name="theme-color" content="#1a1f2b">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Fitness Tracker">
+    <meta property="og:description" content="Track your fitness journey with this easy-to-use workout tracker.">
+    <meta property="og:type" content="website">
+    
+    <title>Fitness Tracker</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/habit-tracker.css">
+    <link rel="stylesheet" href="css/exercise-tracker.css">
+    
+    <!-- Database Scripts -->
+    <script src="js/db-config.js"></script>
+    <script src="js/db-service-base.js"></script>
+    <script src="js/db-service-mock.js"></script>
+    <script src="js/db-service-auth.js"></script>
+    <script src="js/db-service-workouts.js"></script>
+    <script src="js/db-service-goals.js"></script>
+    <script src="js/db-service-measurements.js"></script>
+    <script src="js/db-service-habits.js"></script>
+    <script src="js/db-service-exercises.js"></script>
+    <script src="js/db-init.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Fitness Tracker</h1>
+            <div id="user-status">
+                <div id="logged-out" class="auth-section">
+                    <button id="login-btn">Login</button>
+                    <button id="signup-btn">Sign Up</button>
+                </div>
+                <div id="logged-in" class="auth-section hidden">
+                    <span id="user-email"></span>
+                    <button id="logout-btn">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <div id="auth-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modal-title">Login</h2>
+                <form id="auth-form">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" id="auth-submit-btn">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <main id="app-content" class="hidden">
+            <nav class="app-nav">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                    <li><a href="#" class="nav-link" data-section="exercises">Exercises</a></li>
+                    <li><a href="#" class="nav-link" data-section="goals">Goals</a></li>
+                    <li><a href="#" class="nav-link" data-section="habits">Habits</a></li>
+                    <li><a href="#" class="nav-link" data-section="measurements">Measurements</a></li>
+                </ul>
+            </nav>
+            
+            <section id="dashboard" class="app-section">
+                <div class="dashboard-header">
+                    <h2>Your Fitness Dashboard</h2>
+                    <button id="add-workout-btn">Add Workout</button>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Total Workouts</h3>
+                        <p id="total-workouts">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>This Week</h3>
+                        <p id="week-workouts">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Streak</h3>
+                        <p id="workout-streak">0 days</p>
+                    </div>
+                </div>
+
+                <div class="recent-workouts">
+                    <h3>Recent Workouts</h3>
+                    <div id="workouts-list"></div>
+                </div>
+            </section>
+            
+            <section id="goals" class="app-section hidden">
+                <div class="section-header">
+                    <h2>Fitness Goals</h2>
+                    <button id="add-goal-btn">Add Goal</button>
+                </div>
+                
+                <div class="goals-container">
+                    <div id="goals-list"></div>
+                </div>
+            </section>
+            
+            <!-- Habits Section -->
+            <section id="habits" class="app-section hidden">
+                <div class="section-header">
+                    <h2>Habit Tracker</h2>
+                    <button id="add-habit-btn">Add Habit</button>
+                </div>
+                
+                <div class="habits-container">
+                    <div class="habit-matrix">
+                        <div class="habit-matrix-header">
+                            <h3 class="habit-matrix-title">Weekly Overview</h3>
+                            <div class="habit-matrix-tabs">
+                                <div class="habit-matrix-tab active">Week</div>
+                                <div class="habit-matrix-tab">Month</div>
+                                <div class="habit-matrix-tab">Year</div>
+                            </div>
+                        </div>
+                        
+                        <div class="habit-grid">
+                            <div class="habit-grid-header">
+                                <div class="habit-grid-header-cell">Habit</div>
+                                <div class="habit-grid-header-cell">Mon</div>
+                                <div class="habit-grid-header-cell">Tue</div>
+                                <div class="habit-grid-header-cell">Wed</div>
+                                <div class="habit-grid-header-cell">Thu</div>
+                                <div class="habit-grid-header-cell">Fri</div>
+                                <div class="habit-grid-header-cell">Sat</div>
+                                <div class="habit-grid-header-cell">Sun</div>
+                            </div>
+                            
+                            <div id="habit-grid-content">
+                                <!-- Habit rows will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="habit-list" id="habits-list">
+                        <!-- Habit items will be added here dynamically -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Exercises Section -->
+            <section id="exercises" class="app-section hidden">
+                <div class="section-header">
+                    <h2>Exercise Tracker</h2>
+                    <button id="add-exercise-btn">Add Exercise</button>
+                </div>
+                
+                <div class="exercises-container">
+                    <div class="exercise-calendar">
+                        <div class="calendar-header">
+                            <h3>Exercise Calendar</h3>
+                            <div class="calendar-navigation">
+                                <button id="prev-month">&lt;</button>
+                                <span id="current-month-year">March 2025</span>
+                                <button id="next-month">&gt;</button>
+                            </div>
+                        </div>
+                        <div id="calendar-grid" class="calendar-grid">
+                            <!-- Calendar will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="daily-exercises hidden" id="daily-exercises">
+                        <div class="daily-exercises-header">
+                            <button id="back-to-calendar">&lt; Back</button>
+                            <h3 id="selected-date">March 5, 2025</h3>
+                        </div>
+                        <div class="daily-exercises-list" id="exercises-list">
+                            <!-- Daily exercises will be displayed here -->
+                            <div class="empty-state">
+                                <p>No exercises logged for this day.</p>
+                                <button id="log-exercise-btn">Log Exercise</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="measurements" class="app-section hidden">
+                <div class="section-header">
+                    <h2>Body Measurements</h2>
+                    <button id="add-measurement-btn">Add Measurement</button>
+                </div>
+                
+                <div class="measurements-container">
+                    <div id="measurements-chart">
+                        <div class="chart-placeholder">
+                            <h3>Measurements Progress</h3>
+                            <div class="chart-stats">
+                                <div class="chart-stat">
+                                    <div class="value">23</div>
+                                    <div class="label">ENTRIES</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="value">45.2%</div>
+                                    <div class="label">CHANGE</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="value">234</div>
+                                    <div class="label">DAYS</div>
+                                </div>
+                            </div>
+                            <div class="chart-line"></div>
+                            <div class="chart-dots">
+                                <div class="chart-dot"></div>
+                                <div class="chart-dot"></div>
+                                <div class="chart-dot active"></div>
+                                <div class="chart-dot"></div>
+                                <div class="chart-dot"></div>
+                                <div class="chart-dot"></div>
+                                <div class="chart-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="measurements-list"></div>
+                </div>
+            </section>
+
+            <section id="workout-form" class="form-section hidden">
+                <h2>Add Workout</h2>
+                <form id="new-workout-form">
+                    <div class="form-group">
+                        <label for="workout-date">Date:</label>
+                        <input type="date" id="workout-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workout-type">Workout Type:</label>
+                        <select id="workout-type" required>
+                            <option value="">Select type</option>
+                            <option value="cardio">Cardio</option>
+                            <option value="strength">Strength Training</option>
+                            <option value="flexibility">Flexibility</option>
+                            <option value="sports">Sports</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="workout-duration">Duration (minutes):</label>
+                        <input type="number" id="workout-duration" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workout-intensity">Intensity:</label>
+                        <select id="workout-intensity" required>
+                            <option value="">Select intensity</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="workout-notes">Notes:</label>
+                        <textarea id="workout-notes"></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" id="cancel-workout-btn">Cancel</button>
+                        <button type="submit">Save Workout</button>
+                    </div>
+                </form>
+            </section>
+            
+            <section id="goal-form" class="form-section hidden">
+                <h2>Add Goal</h2>
+                <form id="new-goal-form">
+                    <div class="form-group">
+                        <label for="goal-title">Title:</label>
+                        <input type="text" id="goal-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-description">Description:</label>
+                        <textarea id="goal-description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-category">Category:</label>
+                        <select id="goal-category" required>
+                            <option value="">Select category</option>
+                            <option value="weight">Weight</option>
+                            <option value="strength">Strength</option>
+                            <option value="endurance">Endurance</option>
+                            <option value="habit">Habit</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-target-value">Target Value:</label>
+                        <input type="number" id="goal-target-value" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-current-value">Current Value:</label>
+                        <input type="number" id="goal-current-value" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-unit">Unit:</label>
+                        <input type="text" id="goal-unit" placeholder="e.g., kg, miles, times per week">
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-start-date">Start Date:</label>
+                        <input type="date" id="goal-start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-target-date">Target Date:</label>
+                        <input type="date" id="goal-target-date">
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" id="cancel-goal-btn">Cancel</button>
+                        <button type="submit">Save Goal</button>
+                    </div>
+                </form>
+            </section>
+            
+            <!-- Habit Form -->
+            <section id="habit-form" class="form-section hidden">
+                <h2>Add Habit</h2>
+                <form id="new-habit-form">
+                    <div class="form-group">
+                        <label for="habit-name">Name:</label>
+                        <input type="text" id="habit-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="habit-description">Description:</label>
+                        <textarea id="habit-description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="habit-frequency">Frequency:</label>
+                        <select id="habit-frequency" required>
+                            <option value="">Select frequency</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekdays">Weekdays</option>
+                            <option value="weekends">Weekends</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group hidden" id="custom-days-group">
+                        <label>Custom Days:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="custom-days" value="mon"> Monday</label>
+                            <label><input type="checkbox" name="custom-days" value="tue"> Tuesday</label>
+                            <label><input type="checkbox" name="custom-days" value="wed"> Wednesday</label>
+                            <label><input type="checkbox" name="custom-days" value="thu"> Thursday</label>
+                            <label><input type="checkbox" name="custom-days" value="fri"> Friday</label>
+                            <label><input type="checkbox" name="custom-days" value="sat"> Saturday</label>
+                            <label><input type="checkbox" name="custom-days" value="sun"> Sunday</label>
+                        </div>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" id="cancel-habit-btn">Cancel</button>
+                        <button type="submit">Save Habit</button>
+                    </div>
+                </form>
+            </section>
+            
+            <!-- Exercise Form -->
+            <section id="exercise-form" class="form-section hidden">
+                <h2>Add Exercise</h2>
+                <form id="new-exercise-form">
+                    <div class="form-group">
+                        <label for="exercise-date">Date:</label>
+                        <input type="date" id="exercise-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-name">Exercise Name:</label>
+                        <input type="text" id="exercise-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-type">Exercise Type:</label>
+                        <select id="exercise-type" required>
+                            <option value="">Select type</option>
+                            <option value="strength">Strength</option>
+                            <option value="cardio">Cardio</option>
+                            <option value="flexibility">Flexibility</option>
+                            <option value="balance">Balance</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group exercise-strength-fields">
+                        <label for="exercise-sets">Sets:</label>
+                        <input type="number" id="exercise-sets" min="1">
+                    </div>
+                    <div class="form-group exercise-strength-fields">
+                        <label for="exercise-reps">Reps per Set:</label>
+                        <input type="number" id="exercise-reps" min="1">
+                    </div>
+                    <div class="form-group exercise-strength-fields">
+                        <label for="exercise-weight">Weight (kg):</label>
+                        <input type="number" id="exercise-weight" step="0.5" min="0">
+                    </div>
+                    <div class="form-group exercise-cardio-fields hidden">
+                        <label for="exercise-distance">Distance (km):</label>
+                        <input type="number" id="exercise-distance" step="0.01" min="0">
+                    </div>
+                    <div class="form-group exercise-cardio-fields hidden">
+                        <label for="exercise-duration">Duration (minutes):</label>
+                        <input type="number" id="exercise-duration" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-notes">Notes:</label>
+                        <textarea id="exercise-notes"></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" id="cancel-exercise-btn">Cancel</button>
+                        <button type="submit">Save Exercise</button>
+                    </div>
+                </form>
+            </section>
+            
+            <section id="measurement-form" class="form-section hidden">
+                <h2>Add Measurement</h2>
+                <form id="new-measurement-form">
+                    <div class="form-group">
+                        <label for="measurement-date">Date:</label>
+                        <input type="date" id="measurement-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-weight">Weight (kg):</label>
+                        <input type="number" id="measurement-weight" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-height">Height (cm):</label>
+                        <input type="number" id="measurement-height" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-body-fat">Body Fat (%):</label>
+                        <input type="number" id="measurement-body-fat" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-chest">Chest (cm):</label>
+                        <input type="number" id="measurement-chest" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-waist">Waist (cm):</label>
+                        <input type="number" id="measurement-waist" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-hips">Hips (cm):</label>
+                        <input type="number" id="measurement-hips" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-arms">Arms (cm):</label>
+                        <input type="number" id="measurement-arms" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-thighs">Thighs (cm):</label>
+                        <input type="number" id="measurement-thighs" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement-notes">Notes:</label>
+                        <textarea id="measurement-notes"></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" id="cancel-measurement-btn">Cancel</button>
+                        <button type="submit">Save Measurement</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+        
+        <!-- Bottom Navigation for Mobile -->
+        <div class="bottom-nav">
+            <a href="#" class="bottom-nav-link active" data-section="dashboard">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                </div>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="bottom-nav-link" data-section="exercises">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+                    </svg>
+                </div>
+                <span>Exercises</span>
+            </a>
+            <a href="#" class="bottom-nav-link" data-section="goals">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <span>Goals</span>
+            </a>
+            <a href="#" class="bottom-nav-link" data-section="habits">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                    </svg>
+                </div>
+                <span>Habits</span>
+            </a>
+            <a href="#" class="bottom-nav-link" data-section="measurements">
+                <div class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/>
+                    </svg>
+                </div>
+                <span>Measure</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/workouts.js"></script>
+    <script src="js/goals.js"></script>
+    <script src="js/measurements.js"></script>
+    <script src="js/habit-tracker.js"></script>
+    <script src="js/exercises.js"></script>
+    <script src="js/measurements-chart.js"></script>
+    <script src="js/app.js"></script>
+    
+    <!-- Register Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

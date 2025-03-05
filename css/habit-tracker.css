@@ -1,0 +1,236 @@
+/* Habit Tracker Styles */
+
+/* Habits Section */
+#habits {
+    padding: 20px;
+}
+
+/* Habits Container */
+.habits-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Habit Matrix */
+.habit-matrix {
+    background-color: #1a1f2b;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.habit-matrix-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.habit-matrix-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.habit-matrix-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.habit-matrix-tab {
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #aaa;
+    transition: all 0.3s ease;
+}
+
+.habit-matrix-tab.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.habit-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.habit-grid-header {
+    display: grid;
+    grid-template-columns: 2fr repeat(7, 1fr);
+    gap: 5px;
+}
+
+.habit-grid-header-cell {
+    padding: 8px;
+    text-align: center;
+    font-weight: bold;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.habit-row {
+    display: grid;
+    grid-template-columns: 2fr repeat(7, 1fr);
+    gap: 5px;
+    align-items: center;
+}
+
+.habit-name {
+    padding: 8px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.habit-cell {
+    height: 30px;
+    border-radius: 5px;
+    background-color: #2a3042;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.habit-cell.completed {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.habit-cell.partial {
+    background-color: #FFC107;
+    color: #333;
+}
+
+.no-habits-grid {
+    text-align: center;
+    padding: 20px;
+    color: #aaa;
+}
+
+/* Habit List */
+.habit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.habit-item {
+    background-color: #1a1f2b;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.habit-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.habit-item-name {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.habit-item-frequency {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.habit-item-description {
+    margin-bottom: 10px;
+    color: #ddd;
+    font-size: 0.9rem;
+}
+
+.habit-item-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.habit-item-stat {
+    text-align: center;
+    flex: 1;
+}
+
+.habit-item-stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+.habit-item-stat-label {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.habit-item-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.no-habits {
+    text-align: center;
+    padding: 20px;
+    color: #aaa;
+}
+
+/* Habit Form */
+#habit-form {
+    padding: 20px;
+}
+
+#new-habit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .habit-grid-header {
+        grid-template-columns: 1fr repeat(7, 1fr);
+    }
+    
+    .habit-row {
+        grid-template-columns: 1fr repeat(7, 1fr);
+    }
+    
+    .habit-name {
+        font-size: 0.8rem;
+    }
+    
+    .habit-cell {
+        height: 25px;
+    }
+    
+    .habit-item-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

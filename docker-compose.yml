@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:14-alpine
+    container_name: fitness_tracker_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fitness_tracker}
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - fitness_tracker_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin} -d ${DB_NAME:-fitness_tracker}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Server - API backend
+  server:
+    build: ./server
+    container_name: fitness_tracker_server
+    env_file:
+      - ./server/.env
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+    ports:
+      - "${SERVER_PORT:-3001}:3001"
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Web Server for Client - Frontend
+  web:
+    image: nginx:alpine
+    container_name: fitness_tracker_web
+    ports:
+      - "${WEB_PORT:-80}:80"
+    volumes:
+      - .:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      - API_SERVER=server
+
+volumes:
+  fitness_tracker_data:
+    name: fitness_tracker_data
